@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useLeads, useStatusOpcoes } from '@/hooks/useLeads';
+import { useAllLeads, useStatusOpcoes } from '@/hooks/useLeads';
 import { useProfiles } from '@/hooks/useProfiles';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { StatsCard } from '@/components/dashboard/StatsCard';
@@ -13,7 +13,7 @@ import { ptBR } from 'date-fns/locale';
 
 export default function Dashboard() {
   const { user, isAdmin } = useAuthContext();
-  const { data: leads, isLoading } = useLeads();
+  const { data: leads, isLoading } = useAllLeads();
   const { data: statusOpcoes } = useStatusOpcoes();
   const { data: profiles } = useProfiles();
 

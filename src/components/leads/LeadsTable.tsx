@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import {
   Table,
   TableBody,
@@ -7,15 +6,16 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { StatusBadge } from './StatusBadge';
+import { StatusSelect } from './StatusSelect';
 import { LeadWithStatus } from '@/types/database';
 import { Phone } from 'lucide-react';
 
 interface LeadsTableProps {
   leads: LeadWithStatus[];
+  onOpenModal: (leadId: string) => void;
 }
 
-export function LeadsTable({ leads }: LeadsTableProps) {
+export function LeadsTable({ leads, onOpenModal }: LeadsTableProps) {
   return (
     <div className="rounded-lg border border-border bg-card">
       <Table>
@@ -39,14 +39,15 @@ export function LeadsTable({ leads }: LeadsTableProps) {
             ].filter(Boolean).length;
 
             return (
-              <TableRow key={lead.id} className="cursor-pointer hover:bg-muted/50">
+              <TableRow 
+                key={lead.id} 
+                className="cursor-pointer hover:bg-muted/50"
+                onClick={() => onOpenModal(lead.id)}
+              >
                 <TableCell>
-                  <Link
-                    to={`/leads/${lead.id}`}
-                    className="font-medium text-foreground hover:text-primary"
-                  >
+                  <span className="font-medium text-foreground hover:text-primary">
                     {lead.nome}
-                  </Link>
+                  </span>
                 </TableCell>
                 <TableCell className="text-muted-foreground">
                   {lead.cidade && lead.uf
@@ -64,10 +65,12 @@ export function LeadsTable({ leads }: LeadsTableProps) {
                     )}
                   </div>
                 </TableCell>
-                <TableCell>
-                  {lead.status_opcoes && (
-                    <StatusBadge status={lead.status_opcoes.descricao} />
-                  )}
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <StatusSelect
+                    leadId={lead.id}
+                    currentStatusId={lead.status_id}
+                    currentStatusDescricao={lead.status_opcoes?.descricao || null}
+                  />
                 </TableCell>
                 <TableCell className="text-muted-foreground">
                   {lead.profiles?.nome || lead.profiles?.email || '-'}
