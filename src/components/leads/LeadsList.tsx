@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useLeads } from '@/hooks/useLeads';
+import { useLeads, SortField, SortDirection } from '@/hooks/useLeads';
+import { useAuth } from '@/hooks/useAuth';
 import { LeadCard } from './LeadCard';
 import { LeadFilters } from './LeadFilters';
 import { LeadsTable } from './LeadsTable';
@@ -23,19 +24,38 @@ export function LeadsList() {
   const [statusFilter, setStatusFilter] = useState<number | undefined>();
   const [page, setPage] = useState(1);
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
+  const [sortField, setSortField] = useState<SortField>('created_at');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const isMobile = useIsMobile();
+  const { isAdmin } = useAuth();
 
-  const { data, isLoading, error } = useLeads(statusFilter, search, page, PAGE_SIZE);
+  const { data, isLoading, error } = useLeads(
+    statusFilter, 
+    search, 
+    page, 
+    PAGE_SIZE,
+    sortField,
+    sortDirection
+  );
 
-  // Reset to page 1 when filters change
+  // Reset to page 1 when filters or sort change
   useEffect(() => {
     setPage(1);
-  }, [search, statusFilter]);
+  }, [search, statusFilter, sortField, sortDirection]);
 
   const totalPages = data ? Math.ceil(data.totalCount / PAGE_SIZE) : 0;
 
   const handleOpenModal = (leadId: string) => {
     setSelectedLeadId(leadId);
+  };
+
+  const handleSort = (field: SortField) => {
+    if (field === sortField) {
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
   };
 
   const renderPaginationItems = () => {
@@ -140,7 +160,14 @@ export function LeadsList() {
           ))}
         </div>
       ) : (
-        <LeadsTable leads={leads} onOpenModal={handleOpenModal} />
+        <LeadsTable 
+          leads={leads} 
+          onOpenModal={handleOpenModal}
+          isAdmin={isAdmin}
+          sortField={sortField}
+          sortDirection={sortDirection}
+          onSort={handleSort}
+        />
       )}
 
       {/* Pagination */}

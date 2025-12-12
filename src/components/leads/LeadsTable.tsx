@@ -7,25 +7,64 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { StatusSelect } from './StatusSelect';
+import { AssigneeSelect } from './AssigneeSelect';
 import { LeadWithStatus } from '@/types/database';
-import { Phone } from 'lucide-react';
+import { Phone, ArrowUp, ArrowDown } from 'lucide-react';
+import { SortField, SortDirection } from '@/hooks/useLeads';
+import { cn } from '@/lib/utils';
 
 interface LeadsTableProps {
   leads: LeadWithStatus[];
   onOpenModal: (leadId: string) => void;
+  isAdmin: boolean;
+  sortField: SortField;
+  sortDirection: SortDirection;
+  onSort: (field: SortField) => void;
 }
 
-export function LeadsTable({ leads, onOpenModal }: LeadsTableProps) {
+export function LeadsTable({ 
+  leads, 
+  onOpenModal, 
+  isAdmin,
+  sortField,
+  sortDirection,
+  onSort,
+}: LeadsTableProps) {
+  const SortIndicator = ({ field }: { field: SortField }) => {
+    if (sortField !== field) return null;
+    return sortDirection === 'asc' 
+      ? <ArrowUp className="h-4 w-4" /> 
+      : <ArrowDown className="h-4 w-4" />;
+  };
+
   return (
     <div className="rounded-lg border border-border bg-card">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Nome</TableHead>
+            <TableHead 
+              className="cursor-pointer select-none hover:bg-muted/50"
+              onClick={() => onSort('nome')}
+            >
+              <div className="flex items-center gap-1">
+                Nome
+                <SortIndicator field="nome" />
+              </div>
+            </TableHead>
             <TableHead>Cidade</TableHead>
             <TableHead>Telefone</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Atribuído a</TableHead>
+            <TableHead 
+              className="cursor-pointer select-none hover:bg-muted/50"
+              onClick={() => onSort('status_id')}
+            >
+              <div className="flex items-center gap-1">
+                Status
+                <SortIndicator field="status_id" />
+              </div>
+            </TableHead>
+            {isAdmin && (
+              <TableHead>Atribuído a</TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -72,9 +111,15 @@ export function LeadsTable({ leads, onOpenModal }: LeadsTableProps) {
                     currentStatusDescricao={lead.status_opcoes?.descricao || null}
                   />
                 </TableCell>
-                <TableCell className="text-muted-foreground">
-                  {lead.profiles?.nome || lead.profiles?.email || '-'}
-                </TableCell>
+                {isAdmin && (
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    <AssigneeSelect
+                      leadId={lead.id}
+                      currentAssigneeId={lead.assigned_to}
+                      currentAssigneeName={lead.profiles?.nome || lead.profiles?.email || null}
+                    />
+                  </TableCell>
+                )}
               </TableRow>
             );
           })}
