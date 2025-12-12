@@ -36,22 +36,32 @@ export function Sidebar() {
       )}
     >
       <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
+        <img 
+          src="/logo.png" 
+          alt="SevenGroup" 
+          className={cn('transition-all duration-300', collapsed ? 'h-6 w-auto' : 'h-8 w-auto')}
+        />
         {!collapsed && (
-          <img 
-            src="/logo.png" 
-            alt="SevenGroup" 
-            className="h-8 w-auto"
-          />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setCollapsed(!collapsed)}
+            className="shrink-0 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
         )}
+      </div>
+      {collapsed && (
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setCollapsed(!collapsed)}
-          className="shrink-0 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          className="mx-auto mt-2 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
         >
           <Menu className="h-5 w-5" />
         </Button>
-      </div>
+      )}
 
       <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
         {visibleItems.map((item) => (
