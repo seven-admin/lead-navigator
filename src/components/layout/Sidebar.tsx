@@ -39,7 +39,7 @@ export function Sidebar() {
         <img 
           src="/logo.png" 
           alt="SevenGroup" 
-          className={cn('transition-all duration-300', collapsed ? 'h-6 w-auto' : 'h-8 w-auto')}
+          className={cn('transition-all duration-300 invert brightness-0 invert', collapsed ? 'h-6 w-auto' : 'h-8 w-auto')}
         />
         {!collapsed && (
           <Button

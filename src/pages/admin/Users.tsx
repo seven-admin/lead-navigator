@@ -1,13 +1,33 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '@/contexts/AuthContext';
-import { useUsers, useUpdateUserRole } from '@/hooks/useUsers';
+import { useUsers, useUpdateUserRole, useUpdateUserProfile, useCreateUser, useDeleteUser } from '@/hooks/useUsers';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Loader2, AlertCircle, Shield, User } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { ArrowLeft, Loader2, AlertCircle, Shield, User, Plus, Pencil, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { AppRole } from '@/types/database';
@@ -17,7 +37,28 @@ export default function UsersAdmin() {
   const { isAdmin, user: currentUser } = useAuthContext();
   const { data: users, isLoading } = useUsers();
   const updateRole = useUpdateUserRole();
+  const updateProfile = useUpdateUserProfile();
+  const createUser = useCreateUser();
+  const deleteUser = useDeleteUser();
+  
   const [filter, setFilter] = useState<'all' | AppRole>('all');
+  
+  // Create dialog state
+  const [createOpen, setCreateOpen] = useState(false);
+  const [newEmail, setNewEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [newNome, setNewNome] = useState('');
+  const [newRole, setNewRole] = useState<AppRole>('user');
+  
+  // Edit dialog state
+  const [editOpen, setEditOpen] = useState(false);
+  const [editUserId, setEditUserId] = useState<string | null>(null);
+  const [editNome, setEditNome] = useState('');
+  
+  // Delete dialog state
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
+  const [deleteUserName, setDeleteUserName] = useState('');
 
   if (!isAdmin) {
     return (
@@ -45,6 +86,62 @@ export default function UsersAdmin() {
     updateRole.mutate({ userId, role: newRole });
   };
 
+  const handleCreateUser = () => {
+    if (!newEmail || !newPassword) return;
+    
+    createUser.mutate(
+      { email: newEmail, password: newPassword, nome: newNome || undefined, role: newRole },
+      {
+        onSuccess: () => {
+          setCreateOpen(false);
+          setNewEmail('');
+          setNewPassword('');
+          setNewNome('');
+          setNewRole('user');
+        },
+      }
+    );
+  };
+
+  const handleEditUser = () => {
+    if (!editUserId) return;
+    
+    updateProfile.mutate(
+      { userId: editUserId, nome: editNome },
+      {
+        onSuccess: () => {
+          setEditOpen(false);
+          setEditUserId(null);
+          setEditNome('');
+        },
+      }
+    );
+  };
+
+  const handleDeleteUser = () => {
+    if (!deleteUserId) return;
+    
+    deleteUser.mutate(deleteUserId, {
+      onSuccess: () => {
+        setDeleteOpen(false);
+        setDeleteUserId(null);
+        setDeleteUserName('');
+      },
+    });
+  };
+
+  const openEditDialog = (user: { id: string; nome: string | null }) => {
+    setEditUserId(user.id);
+    setEditNome(user.nome || '');
+    setEditOpen(true);
+  };
+
+  const openDeleteDialog = (user: { id: string; nome: string | null; email: string | null }) => {
+    setDeleteUserId(user.id);
+    setDeleteUserName(user.nome || user.email || 'Usuário');
+    setDeleteOpen(true);
+  };
+
   return (
     <div className="p-4 md:p-6 space-y-6">
       <div className="flex items-center gap-4">
@@ -54,11 +151,17 @@ export default function UsersAdmin() {
         </Button>
       </div>
 
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Gerenciar Usuários</h1>
-        <p className="text-muted-foreground">
-          Visualize e gerencie as permissões dos usuários do sistema
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Gerenciar Usuários</h1>
+          <p className="text-muted-foreground">
+            Crie, edite e gerencie as permissões dos usuários
+          </p>
+        </div>
+        <Button onClick={() => setCreateOpen(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Novo Usuário
+        </Button>
       </div>
 
       <Card>
@@ -88,7 +191,7 @@ export default function UsersAdmin() {
                   <TableHead>Email</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Criado em</TableHead>
-                  <TableHead className="text-right">Ação</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -112,19 +215,36 @@ export default function UsersAdmin() {
                     </TableCell>
                     <TableCell className="text-right">
                       {user.id !== currentUser?.id ? (
-                        <Select
-                          value={user.role}
-                          onValueChange={(v) => handleRoleChange(user.id, v as AppRole)}
-                          disabled={updateRole.isPending}
-                        >
-                          <SelectTrigger className="w-32">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="admin">Admin</SelectItem>
-                            <SelectItem value="user">Usuário</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <div className="flex items-center justify-end gap-2">
+                          <Select
+                            value={user.role}
+                            onValueChange={(v) => handleRoleChange(user.id, v as AppRole)}
+                            disabled={updateRole.isPending}
+                          >
+                            <SelectTrigger className="w-28">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="admin">Admin</SelectItem>
+                              <SelectItem value="user">Usuário</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => openEditDialog(user)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => openDeleteDialog(user)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       ) : (
                         <span className="text-sm text-muted-foreground">Você</span>
                       )}
@@ -136,6 +256,129 @@ export default function UsersAdmin() {
           )}
         </CardContent>
       </Card>
+
+      {/* Create User Dialog */}
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Novo Usuário</DialogTitle>
+            <DialogDescription>
+              Crie uma nova conta de usuário no sistema.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email *</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="email@exemplo.com"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Senha *</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Mínimo 6 caracteres"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="nome">Nome</Label>
+              <Input
+                id="nome"
+                placeholder="Nome completo"
+                value={newNome}
+                onChange={(e) => setNewNome(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="role">Permissão</Label>
+              <Select value={newRole} onValueChange={(v) => setNewRole(v as AppRole)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="user">Usuário</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCreateOpen(false)}>
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleCreateUser} 
+              disabled={!newEmail || !newPassword || createUser.isPending}
+            >
+              {createUser.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Criar Usuário
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit User Dialog */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Usuário</DialogTitle>
+            <DialogDescription>
+              Altere o nome do usuário.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="editNome">Nome</Label>
+              <Input
+                id="editNome"
+                placeholder="Nome completo"
+                value={editNome}
+                onChange={(e) => setEditNome(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleEditUser} disabled={updateProfile.isPending}>
+              {updateProfile.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete User Alert Dialog */}
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir Usuário</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir <strong>{deleteUserName}</strong>? 
+              Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteUser}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteUser.isPending}
+            >
+              {deleteUser.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
