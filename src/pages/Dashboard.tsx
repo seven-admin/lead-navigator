@@ -18,7 +18,7 @@ export default function Dashboard() {
   const { data: profiles } = useProfiles();
 
   const stats = useMemo(() => {
-    if (!leads || !statusOpcoes) return null;
+    if (!leads || !Array.isArray(leads) || !statusOpcoes) return null;
 
     const totalLeads = leads.length;
     const leadsComTelefone = leads.filter(l => l.telefone_1).length;
