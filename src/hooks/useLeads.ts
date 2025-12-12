@@ -3,18 +3,32 @@ import { supabase } from '@/integrations/supabase/client';
 import { Lead, LeadWithStatus, StatusOpcao } from '@/types/database';
 import { toast } from '@/hooks/use-toast';
 
-export function useLeads(statusFilter?: number, search?: string) {
+interface LeadsResult {
+  data: LeadWithStatus[];
+  totalCount: number;
+}
+
+export function useLeads(
+  statusFilter?: number, 
+  search?: string,
+  page: number = 1,
+  pageSize: number = 20
+) {
   return useQuery({
-    queryKey: ['leads', statusFilter, search],
-    queryFn: async () => {
+    queryKey: ['leads', statusFilter, search, page, pageSize],
+    queryFn: async (): Promise<LeadsResult> => {
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+
       let query = supabase
         .from('leads')
         .select(`
           *,
           status_opcoes (id, descricao),
           profiles (id, nome, email)
-        `)
-        .order('created_at', { ascending: false });
+        `, { count: 'exact' })
+        .order('created_at', { ascending: false })
+        .range(from, to);
 
       if (statusFilter) {
         query = query.eq('status_id', statusFilter);
@@ -24,7 +38,30 @@ export function useLeads(statusFilter?: number, search?: string) {
         query = query.or(`nome.ilike.%${search}%,telefone_1.ilike.%${search}%,telefone_2.ilike.%${search}%`);
       }
 
-      const { data, error } = await query;
+      const { data, error, count } = await query;
+
+      if (error) throw error;
+      return { 
+        data: data as LeadWithStatus[], 
+        totalCount: count ?? 0 
+      };
+    },
+  });
+}
+
+// Hook for fetching all leads without pagination (for Dashboard)
+export function useAllLeads() {
+  return useQuery({
+    queryKey: ['leads-all'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('leads')
+        .select(`
+          *,
+          status_opcoes (id, descricao),
+          profiles (id, nome, email)
+        `)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       return data as LeadWithStatus[];
