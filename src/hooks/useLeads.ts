@@ -8,14 +8,19 @@ interface LeadsResult {
   totalCount: number;
 }
 
+export type SortField = 'nome' | 'created_at' | 'status_id';
+export type SortDirection = 'asc' | 'desc';
+
 export function useLeads(
   statusFilter?: number, 
   search?: string,
   page: number = 1,
-  pageSize: number = 20
+  pageSize: number = 20,
+  sortField: SortField = 'created_at',
+  sortDirection: SortDirection = 'desc'
 ) {
   return useQuery({
-    queryKey: ['leads', statusFilter, search, page, pageSize],
+    queryKey: ['leads', statusFilter, search, page, pageSize, sortField, sortDirection],
     queryFn: async (): Promise<LeadsResult> => {
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
@@ -27,7 +32,7 @@ export function useLeads(
           status_opcoes (id, descricao),
           profiles (id, nome, email)
         `, { count: 'exact' })
-        .order('created_at', { ascending: false })
+        .order(sortField, { ascending: sortDirection === 'asc' })
         .range(from, to);
 
       if (statusFilter) {
