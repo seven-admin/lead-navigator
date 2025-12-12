@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      lead_interacoes: {
+        Row: {
+          created_at: string
+          descricao: string
+          id: string
+          lead_id: string
+          tipo: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          descricao: string
+          id?: string
+          lead_id: string
+          tipo: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          descricao?: string
+          id?: string
+          lead_id?: string
+          tipo?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_interacoes_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_interacoes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           ano_nascimento: number | null

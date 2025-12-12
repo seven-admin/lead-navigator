@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { StatusBadge } from '@/components/leads/StatusBadge';
+import { InteractionHistory } from '@/components/leads/InteractionHistory';
 import { ArrowLeft, Phone, MapPin, User, Calendar, Trash2, Loader2, Save } from 'lucide-react';
 import {
   AlertDialog,
@@ -99,7 +100,7 @@ export default function LeadDetail() {
     (selectedStatus !== null && selectedStatus !== lead.status_id?.toString());
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-6 pb-24 md:pb-6">
       <div className="flex items-center justify-between">
         <Button variant="ghost" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -147,88 +148,92 @@ export default function LeadDetail() {
           )}
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Phone className="h-5 w-5" />
-              Telefones
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {phones.length > 0 ? (
-              <div className="grid gap-2">
-                {phones.map((phone, index) => (
-                  <a
-                    key={index}
-                    href={`tel:${phone}`}
-                    className="flex items-center gap-3 p-3 rounded-lg bg-muted hover:bg-accent transition-colors"
-                  >
-                    <Phone className="h-4 w-4 text-primary" />
-                    <span className="font-medium">{phone}</span>
-                  </a>
-                ))}
-              </div>
-            ) : (
-              <p className="text-muted-foreground">Nenhum telefone cadastrado</p>
-            )}
-          </CardContent>
-        </Card>
-
-        {fullAddress && (
+        <div className="grid gap-4 md:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <MapPin className="h-5 w-5" />
-                Endereço
+                <Phone className="h-5 w-5" />
+                Telefones
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-foreground">{fullAddress}</p>
+              {phones.length > 0 ? (
+                <div className="grid gap-2">
+                  {phones.map((phone, index) => (
+                    <a
+                      key={index}
+                      href={`tel:${phone}`}
+                      className="flex items-center gap-3 p-3 rounded-lg bg-muted hover:bg-accent transition-colors"
+                    >
+                      <Phone className="h-4 w-4 text-primary" />
+                      <span className="font-medium">{phone}</span>
+                    </a>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground">Nenhum telefone cadastrado</p>
+              )}
             </CardContent>
           </Card>
-        )}
 
-        {lead.profiles && (
+          {fullAddress && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5" />
+                  Endereço
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-foreground">{fullAddress}</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          {lead.profiles && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Atribuído a
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-foreground">
+                  {lead.profiles.nome || lead.profiles.email}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Atribuído a
+                <Calendar className="h-5 w-5" />
+                Status
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-foreground">
-                {lead.profiles.nome || lead.profiles.email}
-              </p>
+              <Select
+                value={currentStatus}
+                onValueChange={setSelectedStatus}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {statusOpcoes?.map((status) => (
+                    <SelectItem key={status.id} value={status.id.toString()}>
+                      {status.descricao}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </CardContent>
           </Card>
-        )}
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Status
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Select
-              value={currentStatus}
-              onValueChange={setSelectedStatus}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o status" />
-              </SelectTrigger>
-              <SelectContent>
-                {statusOpcoes?.map((status) => (
-                  <SelectItem key={status.id} value={status.id.toString()}>
-                    {status.descricao}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
+        </div>
 
         <Card>
           <CardHeader>
@@ -258,6 +263,9 @@ export default function LeadDetail() {
             Salvar alterações
           </Button>
         )}
+
+        {/* Histórico de Interações */}
+        <InteractionHistory leadId={id!} />
       </div>
     </div>
   );

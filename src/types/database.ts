@@ -46,3 +46,18 @@ export interface LeadWithStatus extends Lead {
   status_opcoes: StatusOpcao | null;
   profiles: Profile | null;
 }
+
+export type TipoInteracao = 'ligacao' | 'mensagem' | 'reuniao' | 'nota' | 'email';
+
+export interface LeadInteracao {
+  id: string;
+  lead_id: string;
+  user_id: string;
+  tipo: TipoInteracao;
+  descricao: string;
+  created_at: string;
+}
+
+export interface LeadInteracaoWithProfile extends LeadInteracao {
+  profiles: Profile | null;
+}
