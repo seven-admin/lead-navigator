@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => ({
     port: 8080
   },
   preview: {
-    host: true,
+    host: "0.0.0.0",  // <- MUDANÇA AQUI
     port: 3000,
     allowedHosts: ["leads.sevengroup360sys.com.br"]
   },
