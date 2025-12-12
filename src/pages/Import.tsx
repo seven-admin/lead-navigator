@@ -152,7 +152,7 @@ export default function Import() {
           if (!isNaN(year)) lead[mappedKey] = year;
         } else if (mappedKey === 'sexo') {
           const normalized = value.toUpperCase().charAt(0);
-          if (normalized === 'M' || normalized === 'F') {
+          if (normalized === 'M' || normalized === 'F' || normalized === 'I') {
             lead[mappedKey] = normalized;
           }
         } else if (mappedKey === 'classe') {
