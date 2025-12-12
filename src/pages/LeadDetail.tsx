@@ -138,7 +138,7 @@ export default function LeadDetail() {
           <div>
             <h1 className="text-2xl font-bold text-foreground">{lead.nome}</h1>
             <p className="text-muted-foreground">
-              {lead.sexo === 'M' ? 'Masculino' : lead.sexo === 'F' ? 'Feminino' : ''}
+              {lead.sexo === 'M' ? 'Masculino' : lead.sexo === 'F' ? 'Feminino' : lead.sexo === 'I' ? 'Indeterminado' : ''}
               {lead.ano_nascimento && ` • Nascimento: ${lead.ano_nascimento}`}
               {lead.classe && ` • Classe ${lead.classe}`}
             </p>

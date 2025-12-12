@@ -21,7 +21,7 @@ export interface UserRole {
 export interface Lead {
   id: string;
   nome: string;
-  sexo: 'M' | 'F' | null;
+  sexo: 'M' | 'F' | 'I' | null;
   ano_nascimento: number | null;
   classe: 'A' | 'B' | 'C' | 'D' | 'E' | null;
   endereco: string | null;
