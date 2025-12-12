@@ -1,4 +1,4 @@
-import { Home, Users, Upload, LogOut } from 'lucide-react';
+import { Home, Users, Upload, LogOut, Settings } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -7,6 +7,7 @@ const navItems = [
   { to: '/dashboard', icon: Home, label: 'Início' },
   { to: '/leads', icon: Users, label: 'Leads' },
   { to: '/import', icon: Upload, label: 'Importar', adminOnly: true },
+  { to: '/admin/usuarios', icon: Settings, label: 'Admin', adminOnly: true },
 ];
 
 export function BottomNav() {
@@ -21,7 +22,7 @@ export function BottomNav() {
   const visibleItems = navItems.filter(item => !item.adminOnly || isAdmin);
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar border-t border-sidebar-border md:hidden">
       <div className="flex items-center justify-around h-16">
         {visibleItems.map((item) => (
           <NavLink
@@ -29,8 +30,8 @@ export function BottomNav() {
             to={item.to}
             className={({ isActive }) =>
               cn(
-                'flex flex-col items-center justify-center gap-1 px-3 py-2 text-muted-foreground transition-colors',
-                isActive && 'text-primary'
+                'flex flex-col items-center justify-center gap-1 px-3 py-2 text-sidebar-muted transition-colors',
+                isActive && 'text-sidebar-foreground'
               )
             }
           >
@@ -40,7 +41,7 @@ export function BottomNav() {
         ))}
         <button
           onClick={handleLogout}
-          className="flex flex-col items-center justify-center gap-1 px-3 py-2 text-muted-foreground"
+          className="flex flex-col items-center justify-center gap-1 px-3 py-2 text-sidebar-muted"
         >
           <LogOut className="h-5 w-5" />
           <span className="text-xs font-medium">Sair</span>
