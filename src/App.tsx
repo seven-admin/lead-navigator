@@ -10,6 +10,8 @@ import Dashboard from "@/pages/Dashboard";
 import Leads from "@/pages/Leads";
 import LeadDetail from "@/pages/LeadDetail";
 import Import from "@/pages/Import";
+import UsersAdmin from "@/pages/admin/Users";
+import StatusManagement from "@/pages/admin/StatusManagement";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -53,6 +55,22 @@ const App = () => (
               element={
                 <MainLayout>
                   <Import />
+                </MainLayout>
+              }
+            />
+            <Route
+              path="/admin/usuarios"
+              element={
+                <MainLayout>
+                  <UsersAdmin />
+                </MainLayout>
+              }
+            />
+            <Route
+              path="/admin/status"
+              element={
+                <MainLayout>
+                  <StatusManagement />
                 </MainLayout>
               }
             />

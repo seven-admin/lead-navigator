@@ -6,12 +6,12 @@ interface StatusBadgeProps {
 }
 
 const statusColors: Record<string, string> = {
-  'SEM CONTATO': 'bg-muted text-muted-foreground',
-  'RETORNAR': 'bg-warning/20 text-warning-foreground border border-warning',
-  'TEM INTERESSE': 'bg-success/20 text-success border border-success',
-  'AGENDADO': 'bg-primary/20 text-primary border border-primary',
-  'CONTATO ERRADO': 'bg-destructive/20 text-destructive border border-destructive',
-  'SEM INTERESSE': 'bg-muted text-muted-foreground',
+  'SEM CONTATO': 'bg-gray-200 text-gray-700',
+  'RETORNAR': 'bg-yellow-500 text-white',
+  'TEM INTERESSE': 'bg-green-500 text-white',
+  'AGENDADO': 'bg-blue-500 text-white',
+  'CONTATO ERRADO': 'bg-red-500 text-white',
+  'SEM INTERESSE': 'bg-gray-500 text-white',
 };
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
@@ -19,7 +19,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
     <span
       className={cn(
         'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-        statusColors[status] || 'bg-muted text-muted-foreground',
+        statusColors[status] || 'bg-gray-200 text-gray-700',
         className
       )}
     >
