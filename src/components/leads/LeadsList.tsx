@@ -5,7 +5,9 @@ import { LeadCard } from './LeadCard';
 import { LeadFilters } from './LeadFilters';
 import { LeadsTable } from './LeadsTable';
 import { LeadDetailModal } from './LeadDetailModal';
-import { Loader2, Users } from 'lucide-react';
+import { CreateLeadModal } from './CreateLeadModal';
+import { Button } from '@/components/ui/button';
+import { Loader2, Users, Plus } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Pagination,
@@ -24,6 +26,7 @@ export function LeadsList() {
   const [statusFilter, setStatusFilter] = useState<number | undefined>();
   const [page, setPage] = useState(1);
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [sortField, setSortField] = useState<SortField>('created_at');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const isMobile = useIsMobile();
@@ -137,12 +140,18 @@ export function LeadsList() {
 
   return (
     <div className="space-y-4">
-      <LeadFilters
-        search={search}
-        onSearchChange={setSearch}
-        statusFilter={statusFilter}
-        onStatusFilterChange={setStatusFilter}
-      />
+      <div className="flex items-center justify-between gap-4">
+        <LeadFilters
+          search={search}
+          onSearchChange={setSearch}
+          statusFilter={statusFilter}
+          onStatusFilterChange={setStatusFilter}
+        />
+        <Button onClick={() => setShowCreateModal(true)} className="shrink-0">
+          <Plus className="h-4 w-4 mr-2" />
+          Novo Lead
+        </Button>
+      </div>
 
       {leads.length === 0 ? (
         <div className="text-center py-12">
@@ -201,6 +210,12 @@ export function LeadsList() {
         leadId={selectedLeadId}
         open={!!selectedLeadId}
         onOpenChange={(open) => !open && setSelectedLeadId(null)}
+      />
+
+      {/* Create Lead Modal */}
+      <CreateLeadModal
+        open={showCreateModal}
+        onOpenChange={setShowCreateModal}
       />
     </div>
   );

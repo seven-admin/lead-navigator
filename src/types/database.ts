@@ -39,12 +39,13 @@ export interface Lead {
   telefone_5: string | null;
   observacoes: string | null;
   assigned_to: string | null;
+  origem: string | null;
   created_at: string;
 }
 
 export interface LeadWithStatus extends Lead {
   status_opcoes: StatusOpcao | null;
-  profiles: Profile | null;
+  profiles: Pick<Profile, 'id' | 'nome' | 'email'> | null;
 }
 
 export type TipoInteracao = 'ligacao' | 'mensagem' | 'reuniao' | 'nota' | 'email';

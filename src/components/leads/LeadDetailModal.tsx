@@ -120,6 +120,7 @@ export function LeadDetailModal({ leadId, open, onOpenChange }: LeadDetailModalP
                   {lead.sexo === 'M' ? 'Masculino' : lead.sexo === 'F' ? 'Feminino' : lead.sexo === 'I' ? 'Indeterminado' : ''}
                   {lead.ano_nascimento && ` • Nascimento: ${lead.ano_nascimento}`}
                   {lead.classe && ` • Classe ${lead.classe}`}
+                  {lead.origem && ` • Origem: ${lead.origem}`}
                 </p>
               </div>
               <div className="flex items-center gap-2">
