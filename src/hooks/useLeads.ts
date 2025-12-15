@@ -201,3 +201,35 @@ export function useDeleteLead() {
     },
   });
 }
+
+export function useCreateLead() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (lead: Omit<Lead, 'id' | 'created_at'> & { origem: string }) => {
+      const { data, error } = await supabase
+        .from('leads')
+        .insert([lead])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['leads'] });
+      queryClient.invalidateQueries({ queryKey: ['leads-all'] });
+      toast({
+        title: 'Lead cadastrado',
+        description: 'O lead foi cadastrado com sucesso.',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Erro ao cadastrar',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+}

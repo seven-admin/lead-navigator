@@ -71,6 +71,7 @@ export type Database = {
           nome: string
           numero: string | null
           observacoes: string | null
+          origem: string | null
           sexo: string | null
           status_id: number | null
           telefone_1: string | null
@@ -94,6 +95,7 @@ export type Database = {
           nome: string
           numero?: string | null
           observacoes?: string | null
+          origem?: string | null
           sexo?: string | null
           status_id?: number | null
           telefone_1?: string | null
@@ -117,6 +119,7 @@ export type Database = {
           nome?: string
           numero?: string | null
           observacoes?: string | null
+          origem?: string | null
           sexo?: string | null
           status_id?: number | null
           telefone_1?: string | null
